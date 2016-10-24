@@ -76,7 +76,6 @@
       <DependentUpon>AIO.tt</DependentUpon>
     </Compile>
     <Compile Include="Authentication.cs" />
-    <Compile Include="ForgeDataManagment.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="ForgeIoCommunication.cs" />
     <Compile Include="GeneralUtilities.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Forge.Autocad_IO;
 using Forge.Common;
 
 
@@ -14,7 +15,7 @@ namespace ForgeConsole
 			const string clientSecret = "tGBZepNdnvCaxH05";
 
 
-			var dataMng = new ForgeDataManagment();
+			var dataMng = new AcadIoCommunication();
 
 			var authenticationUrl = dataMng.GetAuthenticationUrl(clientId);
 			Process.Start(authenticationUrl);
