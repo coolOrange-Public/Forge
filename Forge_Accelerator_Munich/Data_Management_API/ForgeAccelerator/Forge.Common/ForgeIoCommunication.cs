@@ -12,6 +12,7 @@ using System.Web.Script.Serialization;
 using AIO.ACES.Models;
 using AIO.Operations;
 using Flurl.Http;
+using Flurl.Http.Content;
 using Newtonsoft.Json;
 
 namespace Forge.Common
@@ -262,6 +263,130 @@ namespace Forge.Common
 			var response = CreateRequest(string.Format("/project/v1/hubs/{0}/projects", hubId)).GetAsync().Result;
 			var hubs = GetResponseBody(response)["data"].ToString();
 			return JsonConvert.DeserializeObject<IList<Entity>>(hubs);
+		}
+
+		public dynamic CreateStorageLocation(string projectId, string folderId, string fileName)
+		{
+			var req = CreateRequest("/data/v1/projects/" + projectId + "/storage");
+			var dataAsJson = req.Settings.JsonSerializer.Serialize(new
+			{
+				jsonapi = new { version = "1.0" },
+				data = new
+				{
+					type = "objects",
+					attributes = new
+					{
+						name = fileName
+					},
+					relationships = new
+					{
+						target = new
+						{
+							data = new
+							{
+								type = "folders",
+								id = folderId
+							}
+						}
+					}
+				}
+			});
+
+			var capturedJsonContent = new CapturedJsonContent(dataAsJson);
+			capturedJsonContent.Headers.ContentType.MediaType = "application/vnd.api+json";
+			capturedJsonContent.Headers.ContentType.CharSet = null;
+			var responseContent = req.SendAsync(HttpMethod.Post, (HttpContent)capturedJsonContent).Result.Content.ReadAsStringAsync().Result;
+			dynamic response = req.Settings.JsonSerializer.Deserialize<object>(responseContent);
+			return response.data;
+		}
+
+		public Dictionary<string, object> UploadFileToBucket(string bucketName, string objectName, FileInfo file)
+		{
+			if (!file.Exists)
+				throw new Exception(string.Format("File for uploading does not exist: {0}", file.FullName));
+			var bucketRequest = CreateRequest(string.Format("{0}{1}/objects/{2}", RelativeBucketUrl, bucketName, objectName));
+			var streamContent = new StreamContent(file.OpenRead());
+			var response = bucketRequest.PutAsync(streamContent).Result;
+			return GetResponseBody(response);
+		}
+
+
+		public dynamic CreateItem(string projectId, string folderId, string objectId, string fileName)
+		{
+			var req = CreateRequest("/data/v1/projects/" + projectId + "/items");
+			var dataAsJson = req.Settings.JsonSerializer.Serialize(new
+			{
+				jsonapi = new { version = "1.0" },
+				data = new
+				{
+					type = "items",
+					attributes = new
+					{
+						displayName = fileName,
+						extension = new
+						{
+							type = "items:autodesk.core:File",
+							version = "1.0"
+						}
+					},
+					relationships = new
+					{
+						tip = new
+						{
+							data = new
+							{
+								type = "versions",
+								id = "1"
+							}
+						},
+						parent = new
+						{
+							data = new
+							{
+								type = "folders",
+								id = folderId
+							}
+						}
+					}
+				},
+				included = new[]
+					{
+						new
+						{
+							type = "versions",
+							id ="1",
+							attributes = new
+							{
+								name = fileName,
+								extension = new
+								{
+									type="versions:autodesk.core:File",
+									version="1.0"
+								}
+							},
+							relationships = new
+							{
+								storage = new
+								{
+									data = new
+									{
+										type = "objects",
+										id = objectId
+									}
+								}
+							}
+						}
+					}
+
+			});
+
+			var capturedJsonContent = new CapturedJsonContent(dataAsJson);
+			capturedJsonContent.Headers.ContentType.MediaType = "application/vnd.api+json";
+			capturedJsonContent.Headers.ContentType.CharSet = null;
+			//capturedJsonContent.Headers.Add("Accept", "application/vnd.api+json");
+			var responseContent = req.SendAsync(HttpMethod.Post, capturedJsonContent).Result.Content.ReadAsStringAsync().Result;
+			dynamic response = req.Settings.JsonSerializer.Deserialize<object>(responseContent);
+			return response.data;
 		}
 
 		/// <summary>

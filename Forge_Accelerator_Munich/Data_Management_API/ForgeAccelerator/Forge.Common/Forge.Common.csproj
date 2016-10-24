@@ -41,6 +41,7 @@
       <HintPath>..\packages\Flurl.Http.1.0.2\lib\net45\Flurl.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.OData.Client">
       <HintPath>..\packages\Microsoft.OData.Client.6.15.0\lib\net40\Microsoft.OData.Client.dll</HintPath>
     </Reference>

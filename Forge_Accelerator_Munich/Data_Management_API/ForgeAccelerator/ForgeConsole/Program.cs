@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Forge.Autocad_IO;
 using Forge.Common;
@@ -15,22 +16,22 @@ namespace ForgeConsole
 			const string clientSecret = "tGBZepNdnvCaxH05";
 
 
-			var dataMng = new AcadIoCommunication();
+			var comunication = new AcadIoCommunication();
 
-			var authenticationUrl = dataMng.GetAuthenticationUrl(clientId);
+			var authenticationUrl = comunication.GetAuthenticationUrl(clientId);
 			Process.Start(authenticationUrl);
 
 			var code = GetAuthorizationCode();
-			dataMng.Connect(clientId, clientSecret,code);
+			comunication.Connect(clientId, clientSecret,code);
 
-			var hub = dataMng.GetHubs().FirstOrDefault();
+			var hub = comunication.GetHubs().FirstOrDefault();
 			if (hub == null)
 			{
 				Console.Write("No Hub found!");
 				return;
 			}
 
-			var project = dataMng.GetProjects(hub.Id).FirstOrDefault();
+			var project = comunication.GetProjects(hub.Id).FirstOrDefault();
 			if (project == null)
 			{
 				Console.Write("No Project found!");
@@ -45,6 +46,13 @@ namespace ForgeConsole
 			}
 
 			var rootFolderId = rootFolder.Data.Id;
+
+			var file = new FileInfo(@"C:\Temp\TestBaugruppe\HM-ENG-052548.iam");
+			dynamic storageLocation = comunication.CreateStorageLocation(project.Id, rootFolderId, file.Name);
+			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), file);
+			var objectId = uploadedFile["objectId"] as string;
+			var item = comunication.CreateItem(project.Id, rootFolderId, objectId, file.Name);
+
 			Console.ReadLine();
 		}
 
