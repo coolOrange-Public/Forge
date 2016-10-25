@@ -418,8 +418,12 @@ namespace Forge.Common
 								name = fileName,
 								extension = new
 								{
-									type="versions:autodesk.core:File",
-									version="1.0"
+									type="versions:autodesk.a360:CompositeDesign",
+									version="1.0",
+									data = new
+									{
+										parentFile = fileName
+									}
 								}
 							},
 							relationships = new

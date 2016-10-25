@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Forge.Autocad_IO;
-using Forge.Common;
+using System.IO.Compression;
 
 
 namespace ForgeConsole
@@ -46,10 +46,11 @@ namespace ForgeConsole
 			}
 
 			var rootFolderId = rootFolder.Data.Id;
-
 			var file = GetFileName();
+			var compressedFile = CompresseFile(file);
+
 			dynamic storageLocation = comunication.CreateStorageLocation(project.Id, rootFolderId, file.Name);
-			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), file);
+			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), compressedFile);
 			var objectId = uploadedFile["objectId"] as string;
 			var item = comunication.CreateItem(project.Id, rootFolderId, objectId, file.Name);
 
