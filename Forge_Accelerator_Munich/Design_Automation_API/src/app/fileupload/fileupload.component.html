@@ -1,0 +1,52 @@
+<div class="file-upload">
+  <h4>Select files from your computer</h4>
+  <p>Only following formats are allowed: {{allowedExtension}}</p>
+  <form action="" method="post" enctype="multipart/form-data" (submit)="onSubmit($event)">
+
+    <div class="input-group image-preview">
+      <input placeholder="" type="text" class="form-control image-preview-filename" disabled="disabled"
+             value="{{inputFile?.name}}">
+      <span class="input-group-btn">
+                       <button type="button" class="btn btn-default image-preview-clear" style="display:none;">
+                           <span class="glyphicon glyphicon-remove"></span> Clear
+                       </button>
+
+                       <div class="btn btn-default image-preview-input"> <span
+                         class="glyphicon glyphicon-folder-open"></span> <span class="image-preview-input-title">Browse</span>
+                           <input type="file" accept="{{allowedExtension}}" name="input-file-preview"
+                                  (change)="onFileInputChanged($event)" ngModel required/>
+                       </div>
+                       <button type="submit" class="btn btn-labeled btn-default"> <span class="btn-label"><i
+                         class="glyphicon glyphicon-upload"></i> </span> Upload</button>
+                       </span>
+    </div>
+  </form>
+
+
+  <br/>
+
+  <h4>Or drag and drop files below</h4>
+  <div class="upload-drop-zone"
+       (drop)="dropUploadZone($event)" (dragover)="dragoverUploadZone($event)"
+       (dragleave)="dragleaveUploadZone($event)">
+    Just drag and drop files here
+  </div>
+
+  <div class="progress" *ngIf="progress != 0 &&  progress != 100">
+    <div class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" aria-valuenow="40"
+         aria-valuemin="0" aria-valuemax="100"
+         [style.width]="progress + '%'">
+      {{progress}}%
+    </div>
+  </div>
+
+  <div class="js-upload-finished" *ngIf="uploadResult?.data !=null">
+    <h3>Uploaded files</h3>
+    <div class="list-group">
+      <a href="#" *ngIf="uploadResult.success" class="list-group-item list-group-item-success"><span
+        class="badge alert-success pull-right">Success</span>{{uploadResult.data.objectKey}}</a>
+      <a href="#" *ngIf="!uploadResult.success" class="list-group-item list-group-item-danger"><span
+        class="badge alert-danger pull-right">Failed</span>{{inputFile?.name}} - {{uploadResult.data}}</a>
+    </div>
+  </div>
+</div>
