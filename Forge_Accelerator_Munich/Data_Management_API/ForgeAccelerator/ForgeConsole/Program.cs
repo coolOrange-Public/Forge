@@ -47,7 +47,7 @@ namespace ForgeConsole
 
 			var rootFolderId = rootFolder.Data.Id;
 
-			var file = new FileInfo(@"C:\Temp\TestBaugruppe\HM-ENG-052548.iam");
+			var file = GetFileName();
 			dynamic storageLocation = comunication.CreateStorageLocation(project.Id, rootFolderId, file.Name);
 			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), file);
 			var objectId = uploadedFile["objectId"] as string;
@@ -61,6 +61,13 @@ namespace ForgeConsole
 			Console.Write("Please enter the Authorization Code: ");
 			var code = Console.ReadLine();
 			return string.IsNullOrEmpty(code) ? GetAuthorizationCode() : code;
+		}
+
+		static FileInfo GetFileName()
+		{
+			Console.Write("Please enter your full file path:  ");
+			var code = Console.ReadLine();
+			return string.IsNullOrEmpty(code) ? GetFileName() : new FileInfo(code);
 		}
 	}
 }
