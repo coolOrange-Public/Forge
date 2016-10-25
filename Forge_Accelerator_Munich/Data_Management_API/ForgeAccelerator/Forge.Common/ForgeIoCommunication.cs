@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -356,6 +357,19 @@ namespace Forge.Common
 			var responseContent = req.SendAsync(HttpMethod.Post, (HttpContent)capturedJsonContent).Result.Content.ReadAsStringAsync().Result;
 			dynamic response = req.Settings.JsonSerializer.Deserialize<object>(responseContent);
 			return response.data;
+		}
+
+		public void SetReference(string projectId, string rootFileVersionUrn, string dependencyFileVersionUrn, string extentionType)
+		{
+			var urlEncoded = Uri.EscapeDataString(rootFileVersionUrn);
+			var uri = string.Format(
+				"https://developer.api.autodesk.com/data/v1/projects/{0}/versions/{1}/relationships/refs", projectId, urlEncoded);
+			var body = string.Format(
+				"{{\r\n  \"jsonapi\": {{\r\n    \"version\": \"1.0\"\r\n  }},\r\n  \"data\": {{\r\n    \"type\": \"versions\",\r\n    \"id\": \"{0}\",\r\n    \"meta\": {{\r\n      \"extension\": {{\r\n        \"type\": \"{1}\",\r\n        \"version\": \"1.0\"\r\n      }}\r\n    }}\r\n  }}\r\n}}", dependencyFileVersionUrn, extentionType);
+
+			var content = new StringContent(body);
+			content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.api+json");
+			var httpResponseMessage = uri.WithOAuthBearerToken(Authentication.AccessToken).PostAsync(content).Result;
 		}
 
 		public Dictionary<string, object> UploadFileToBucket(string bucketName, string objectName, FileInfo file)
