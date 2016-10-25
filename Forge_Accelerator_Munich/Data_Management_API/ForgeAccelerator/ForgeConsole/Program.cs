@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using Forge.Autocad_IO;
-using Forge.Common;
 
 
 namespace ForgeConsole
@@ -47,11 +47,15 @@ namespace ForgeConsole
 
 			var rootFolderId = rootFolder.Data.Id;
 
-			var file = new FileInfo(@"C:\Temp\TestBaugruppe\HM-ENG-052548.iam");
+			var file = new FileInfo(@"C:\Temp\TestBaugruppe\TestBaugruppe\HOAC102167.iam");
+			var compressedFile = CompresseFile(file);
+
 			dynamic storageLocation = comunication.CreateStorageLocation(project.Id, rootFolderId, file.Name);
-			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), file);
+			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), compressedFile);
 			var objectId = uploadedFile["objectId"] as string;
 			var item = comunication.CreateItem(project.Id, rootFolderId, objectId, file.Name);
+
+
 
 			Console.ReadLine();
 		}
@@ -61,6 +65,13 @@ namespace ForgeConsole
 			Console.Write("Please enter the Authorization Code: ");
 			var code = Console.ReadLine();
 			return string.IsNullOrEmpty(code) ? GetAuthorizationCode() : code;
+		}
+
+		static FileInfo CompresseFile(FileInfo file)
+		{
+			var zipFile = new FileInfo(Path.GetFullPath(Path.Combine(file.DirectoryName, "..\\", Guid.NewGuid() + "_" + Path.GetFileNameWithoutExtension(file.Name) + ".zip")));
+			ZipFile.CreateFromDirectory(file.DirectoryName, zipFile.FullName);
+			return zipFile;
 		}
 	}
 }
