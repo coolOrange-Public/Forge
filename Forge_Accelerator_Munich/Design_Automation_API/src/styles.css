@@ -1,0 +1,229 @@
+html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    padding-top: 70px;
+    padding-bottom: 70px;
+}
+
+span {
+    display: inline-block;
+}
+
+.app-navbar {
+    box-shadow: 0 0 3px #ccc;
+    background-color: #ffffff;
+}
+
+
+.app-content{
+    padding-bottom: 20px;
+}
+
+.app-content > .container{
+    background: white;
+}
+
+
+.jumbotron {
+    background-color: #FF9900;
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.container .jumbotron, .container-fluid .jumbotron {
+    border-radius: 0px;
+}
+
+.navbar-brand, .navbar-nav li a {
+    height: 5%;
+}
+
+.nav-pills {
+    line-height: 25px;
+    padding-top: 15px;
+}
+
+.nav-pills > li > a {
+    border-radius: 0px;
+}
+
+.nav > li > a:hover {
+    background-color: #ff9900;
+}
+
+header .logo, header .logo a {
+    display: flex;
+}
+
+header .brand {
+    background: url("/assets/images/coolorange_logo.png") no-repeat;
+    background-size: contain;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+}
+
+header h1 {
+    margin: 0 0 0 8px;
+    padding-left: 12px;
+    font-weight: 400;
+    font-size: 25px;
+    line-height: 40px;
+    letter-spacing: .4px;
+}
+
+.btn-co {
+    color: #ff9900;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 3px #ff9900;
+    margin-right: 5px;
+    font-size: 15px;
+    font-weight: normal;
+}
+
+.btn-co:hover {
+    cursor: pointer;
+    background-color: #ff9900;
+    color: #ffffff;
+    text-decoration: none !important;
+}
+
+.btn-co-reverse {
+    color: #ffffff;
+    background-color: #ff9900;
+    border: 1px solid #ff9900;
+    margin-right: 5px;
+    font-size: 15px;
+    font-weight: normal;
+}
+
+.btn-co-reverse:hover {
+    cursor: pointer;
+    background-color: #ffffff;
+    color: #ff9900;
+    text-decoration: none !important;
+}
+
+a:hover {
+    cursor: pointer;
+    color: #ff9900;
+    text-decoration: none !important;
+}
+
+a {
+    background-color: transparent;
+}
+
+footer {
+    box-shadow: 0 0 10px #ccc;
+    background-color: #f5f5f5;
+    padding: 16px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+footer ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+}
+
+footer li {
+    float: left;
+    height: 20px;
+    line-height: 20px;
+    color: #656565;
+    padding-right: 10px;
+    font-size: 14px;
+}
+
+footer li + li {
+    border-left: 1px solid #777;
+    padding-left: 10px;
+}
+
+footer .logo {
+    background: url("/assets/images/coolorange_logo.png") no-repeat;
+    background-size: contain;
+    width: 200px;
+    height: 30px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+footer .socials {
+    float: right;
+    height: 20px;
+    line-height: 20px;
+    padding: 10px;
+}
+
+footer .socials a {
+    display: inline-block;
+    position: relative;
+    margin: 0 auto 0 auto;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    background-color: #ff9900;
+}
+
+footer .socials a i {
+    margin: 0;
+    line-height: 40px;
+    text-align: center;
+}
+
+footer .socials i {
+    color: #fff;
+    -webkit-transition: all 0.8s;
+    -moz-transition: all 0.8s;
+    -o-transition: all 0.8s;
+    -ms-transition: all 0.8s;
+    transition: all 0.8s;
+}
+
+footer .socials a:hover {
+    background-color: #656565;
+}
+
+@media only screen and (max-width: 600px) {
+    footer .logo {
+        margin: 30px 20% 3px 20%;
+    }
+
+    footer .socials {
+        float: none;
+        text-align: center;
+        padding: 0;
+    }
+
+    footer .socials a{
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+
+    footer li, li a {
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .nav-pills {
+        padding-bottom: 10px;
+    }
+}
