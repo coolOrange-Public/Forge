@@ -53,8 +53,16 @@ namespace ForgeConsole
 			var uploadedFile = comunication.UploadFileToBucket("wip.dm.prod", (storageLocation.id.Value as string).Split('/').Last(), compressedFile);
 			var objectId = uploadedFile["objectId"] as string;
 			var item = comunication.CreateItem(project.Id, rootFolderId, objectId, file.Name);
-
 			CreateThumbnailForItem(comunication, item, file.FullName + ".png");
+
+			Console.WriteLine("Now comes the dependency");
+			var dependencyFile = GetFileName();
+			dynamic storageLocationDependency = comunication.CreateStorageLocation(project.Id, rootFolderId, dependencyFile.Name);
+			var uploadedFileDependency = comunication.UploadFileToBucket("wip.dm.prod", (storageLocationDependency.id.Value as string).Split('/').Last(), dependencyFile);
+			var objectIdDependency = uploadedFileDependency["objectId"] as string;
+			var itemDependency = comunication.CreateItem(project.Id, rootFolderId, objectIdDependency, dependencyFile.Name);
+			comunication.SetReference(project.Id, item.data.relationships.tip.data.id.ToString(), itemDependency.data.relationships.tip.data.id.ToString(), "auxiliary:autodesk.core:Attachment");
+
 			Console.ReadLine();
 		}
 
