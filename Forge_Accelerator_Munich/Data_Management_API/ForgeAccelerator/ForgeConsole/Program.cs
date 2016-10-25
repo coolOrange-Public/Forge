@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using Forge.Autocad_IO;
-using System.IO.Compression;
 
 
 namespace ForgeConsole
@@ -81,6 +81,13 @@ namespace ForgeConsole
 			Console.Write("Please enter your full file path: ");
 			var code = Console.ReadLine();
 			return string.IsNullOrEmpty(code) ? GetFileName() : new FileInfo(code);
+		}
+
+		static FileInfo CompresseFile(FileInfo file)
+		{
+			var zipFile = new FileInfo(Path.GetFullPath(Path.Combine(file.DirectoryName, "..\\", Guid.NewGuid() + "_" + Path.GetFileNameWithoutExtension(file.Name) + ".zip")));
+			ZipFile.CreateFromDirectory(file.DirectoryName, zipFile.FullName);
+			return zipFile;
 		}
 	}
 }
