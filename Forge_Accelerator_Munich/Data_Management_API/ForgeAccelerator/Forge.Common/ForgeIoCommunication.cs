@@ -34,7 +34,6 @@ namespace Forge.Common
 		public Relationship Hub;
 	}
 
-
 	public struct WorkItemDefinition
 	{
 		public string ActivityId { get; set; }
@@ -72,6 +71,7 @@ namespace Forge.Common
 				};
 		}
 	}
+
 	public struct WorkItemResult
 	{
 		public Uri Result { get; set; }
@@ -265,6 +265,64 @@ namespace Forge.Common
 			return JsonConvert.DeserializeObject<IList<Entity>>(hubs);
 		}
 
+		public dynamic TranslateDerivative(string designUrn, string formatType)
+		{
+			var req = CreateRequest("/modelderivative/v2/designdata/job");
+			var base64Urn = Convert.ToBase64String(Encoding.UTF8.GetBytes(designUrn));
+
+			var dataAsJson = req.Settings.JsonSerializer.Serialize(new
+			{
+				input = new
+				{
+					urn = base64Urn
+				},
+				output = new
+				{
+					formats = new[]
+					{
+						 new { type = formatType}
+					}
+				}
+			});
+
+			var capturedJsonContent = new CapturedJsonContent(dataAsJson);
+			capturedJsonContent.Headers.Add("x-ads-force","true");
+			Console.Write("Creating DeritavieJob...");
+			var responseContent = req.PostAsync(capturedJsonContent).Result.Content.ReadAsStringAsync().Result;
+			dynamic response = req.Settings.JsonSerializer.Deserialize<object>(responseContent);
+			if (response.result.ToString() != "success")
+				throw new Exception("Failed to create Job!");
+
+			dynamic manifest;
+			do
+			{
+				System.Threading.Thread.Sleep(1000);
+				manifest = GetDerivativeManifest(base64Urn);
+			} while (manifest.progress.ToString() != "complete");
+
+			Console.Write("DeritavieJob completed. Status : {0}", manifest.status.ToString());
+			if (manifest.status.ToString() != "sucess")
+				throw new Exception("Translation Failed!");
+			return manifest;
+		}
+
+		public dynamic GetDerivativeManifest(string base64Urn)
+		{
+			var req = CreateRequest(string.Format("/modelderivative/v2/designdata/{0}/manifest", base64Urn));
+			dynamic responseContent = req.GetAsync().Result;
+			return req.Settings.JsonSerializer.Deserialize<object>(responseContent);
+		}
+
+		public Stream GetThumbnail(Uri uri)
+		{
+			return CreateRequest(uri.AbsolutePath).GetAsync().ReceiveStream().Result;
+		}
+
+		public byte[] GetThumbnail(string base64Urn)
+		{
+			return CreateRequest(string.Format("/modelderivative/v2/designdata/{0}/thumbnail", base64Urn)).GetAsync().ReceiveBytes().Result;
+		}
+
 		public dynamic CreateStorageLocation(string projectId, string folderId, string fileName)
 		{
 			var req = CreateRequest("/data/v1/projects/" + projectId + "/storage");
@@ -383,10 +441,8 @@ namespace Forge.Common
 			var capturedJsonContent = new CapturedJsonContent(dataAsJson);
 			capturedJsonContent.Headers.ContentType.MediaType = "application/vnd.api+json";
 			capturedJsonContent.Headers.ContentType.CharSet = null;
-			//capturedJsonContent.Headers.Add("Accept", "application/vnd.api+json");
 			var responseContent = req.SendAsync(HttpMethod.Post, capturedJsonContent).Result.Content.ReadAsStringAsync().Result;
-			dynamic response = req.Settings.JsonSerializer.Deserialize<object>(responseContent);
-			return response.data;
+			return req.Settings.JsonSerializer.Deserialize<object>(responseContent);
 		}
 
 		/// <summary>
@@ -398,7 +454,7 @@ namespace Forge.Common
 			WorkItem wi = new WorkItem
 			{
 				Id = "",
-				Arguments = new AIO.ACES.Models.Arguments(),
+				Arguments = new Arguments(),
 				ActivityId = workItem.ActivityId
 			};
 			foreach (var inputArgument in workItem.InputArguments)
@@ -416,8 +472,8 @@ namespace Forge.Common
 			{
 				System.Threading.Thread.Sleep(5000);
 				wi = Container.WorkItems.Where(p => p.Id == wi.Id).SingleOrDefault();
-			} while (wi.Status == AIO.ACES.Models.ExecutionStatus.Pending ||
-					 wi.Status == AIO.ACES.Models.ExecutionStatus.InProgress);
+			} while (wi.Status == ExecutionStatus.Pending ||
+					 wi.Status == ExecutionStatus.InProgress);
 
 			Console.WriteLine("WorkItem completed. Status : {0}", wi.Status);
 			return new WorkItemResult

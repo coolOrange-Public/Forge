@@ -53,7 +53,19 @@ namespace ForgeConsole
 			var objectId = uploadedFile["objectId"] as string;
 			var item = comunication.CreateItem(project.Id, rootFolderId, objectId, file.Name);
 
+			CreateThumbnailForItem(comunication, item, file.FullName + ".png");
 			Console.ReadLine();
+		}
+
+		static void CreateThumbnailForItem(AcadIoCommunication comunication, dynamic item, string fileName)
+		{
+			Console.Write("Creating Thumbnail for file...");
+			var stream = comunication.GetThumbnail(new Uri(item.included[0].relationships.thumbnails.meta.link.href.ToString()));
+			using (var fileStream = File.Create(fileName))
+			{
+				stream.Seek(0, SeekOrigin.Begin);
+				stream.CopyTo(fileStream);
+			}
 		}
 
 		static string GetAuthorizationCode()
@@ -65,7 +77,7 @@ namespace ForgeConsole
 
 		static FileInfo GetFileName()
 		{
-			Console.Write("Please enter your full file path:  ");
+			Console.Write("Please enter your full file path: ");
 			var code = Console.ReadLine();
 			return string.IsNullOrEmpty(code) ? GetFileName() : new FileInfo(code);
 		}
