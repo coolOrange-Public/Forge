@@ -4,7 +4,8 @@
     <div class="row">
       <div class="col-xs-4">
         <div class="input-group">
-          <input type="number" class="form-control" placeholder="Task creation count..." value="{{taskCount}}" (change)="onTaskCountChanged($event)">
+          <input type="number" class="form-control" min="1" placeholder="Task creation count..." value="{{taskCount}}"
+                 (change)="onTaskCountChanged($event)">
           <span class="input-group-btn">
           <button class="btn btn-labeled btn-default" type="submit"><span class="btn-label"><i
             class="glyphicon glyphicon-expand"></i> </span> Start</button>
@@ -13,14 +14,28 @@
       </div>
     </div>
   </form>
-  <div class="row">
-    <div class="col-xs-12" *ngFor='let workitem of workItems | async'>
-    <!--  <div class="col-xs-8">
-        {{workitem.ActivityId}}
-      </div>
-      <div class="col-xs-4">-->
-        <h1>{{workitem.status}}</h1>
-      <!--</div>-->
+  <div class="row" style="padding-top: 10px">
+    <div class="col-xs-12">
+      <table class="table" *ngFor='let workitem of workItems'>
+        <tr *ngIf="workitem.Status == 'Pending' || workitem.Status == 'InProgress' " class="active">
+          <td class="col-xs-8">
+            {{workitem.ActivityId}}
+          </td>
+          <td class="col-xs-4">
+            In Progress...
+          </td>
+        </tr>
+        <tr *ngIf="workitem.Status == 'Succeeded'" class="success">
+          <td class="col-xs-12">
+            {{workitem.ActivityId}}
+          </td>
+        </tr>
+        <tr *ngIf="workitem.Status == 'Failed'" class="danger">
+          <td class="col-xs-12">
+            {{workitem.ActivityId}}
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>

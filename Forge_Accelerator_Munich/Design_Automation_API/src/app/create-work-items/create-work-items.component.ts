@@ -24,7 +24,7 @@ export class CreateWorkItemsComponent implements OnInit {
   @Input()
   bucketFile: BucketFile;
 
-  workItems: Observable<WorkItem[]>;
+  workItems: WorkItem[];
   taskCount: number = 3;
 
   xref_bucketFile: BucketFile;
@@ -34,44 +34,38 @@ export class CreateWorkItemsComponent implements OnInit {
     })
   }
 
-  onTaskCountChanged(event){
+  onTaskCountChanged(event) {
     this.taskCount = event.target.value;
   }
 
   onSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
     this.createWorkItems(this.bucketFile);
   }
 
   createWorkItems(bucketFile: BucketFile) {
-    console.log("OnSubmit", bucketFile);
-    this.workItems = Observable.forkJoin(this.createObservables());
-  }
+    console.log("TaskCount:", this.taskCount);
+    this.workItems = [];
+    for (let i = 0; i < this.taskCount; ++i){
+      var workItem = new WorkItem();
+      workItem.Status = 'InProgress';
+      workItem.ActivityId = "Activity";
+      this.workItems.push(workItem);
+    }
 
-  private createObservables() : Observable<WorkItem>[] {
-    console.log("Fork Join...",this.taskCount);
-    var observables = [];
-    var states = ['InProgress', 'Succeeded', 'Failed']
-      for (let i = 0; i < this.taskCount; ++i) {
-        {
-          observables.push(this.CreteWorkItemForXRefFile())
-          observables.push(
-            new Observable<WorkItem>(observer=> {
-                var workItem = new WorkItem();
-                workItem.Status = states[Math.floor(Math.random() * states.length)];
-                workItem.ActivityId = "Activity";
-                console.log("Observer running...",workItem);
-                observer.next(workItem);
-                /*  if (workItem.Status.startsWith("Failed"))
-                 observer.error("Error");
-                 if (workItem.Status == "Succeeded")*/
-                // observer.complete();
-              }
-            ));
-        }
-            // .delay((Math.floor(Math.random() * ( 1 + 5000 - 1000 )) + 1000)));
-      }
-      return observables;
+
+    console.log("WorkItems:", this.workItems);
+    var states = ['InProgress', 'Succeeded', 'Failed'];
+    for (let i = 0; i < this.workItems.length; ++i) {
+      this.CreteWorkItemForXRefFile()
+        .subscribe((workItem: WorkItem) => {
+        console.log("subscription",workItem);
+        console.log("Pos", i);
+        this.workItems[i] = workItem;
+      }, error=>{
+          this.workItems[i].Status = 'Failed';
+        });
+    }
   }
 
   private CreteWorkItemForXRefFile(): Observable<WorkItem> {
