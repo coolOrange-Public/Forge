@@ -58,7 +58,7 @@ export class CreateWorkItemsComponent implements OnInit {
     }
 
     for (let i = 0; i < this.workItems.length; ++i) {
-      this.CreateWorkItem(this.workItems[i].ActivityId)
+      this.processWorkItem(this.workItems[i].ActivityId, bucketFile)
         .subscribe((workItem: WorkItem) => {
           this.workItems[i] = workItem;
         }, error=> {
@@ -67,7 +67,7 @@ export class CreateWorkItemsComponent implements OnInit {
     }
   }
 
-  private CreateWorkItem(activityId: string): Observable<WorkItem> {
+  private processWorkItem(activityId: string, bucketFile: BucketFile): Observable<WorkItem> {
     return this.forgeService.getAuthorizationHeader([Scope.DataRead])
       .flatMap(headers => {
         var workItem = new WorkItem();
@@ -75,30 +75,25 @@ export class CreateWorkItemsComponent implements OnInit {
         workItem.Arguments = new WorkItemArguments();
         var inputFile = new WorkItemArgument();
         inputFile.Name = "HostDwg";
-        inputFile.Resource = this.bucketFile.location;
+        inputFile.Resource = bucketFile.location;
         var authorizationHeader = new Header();
         authorizationHeader.Name = "Authorization"
         authorizationHeader.Value = headers.get('Authorization');
         inputFile.Headers = [authorizationHeader]
         workItem.Arguments.InputArguments = [inputFile];
-        return this.forgeService.processWorkItem(this.bucketFile.bucketKey, workItem, "autocad.io", activityId + '_' + this.bucketFile.objectKey);
+
+        if (bucketFile.objectKey.endsWith(".zip"))
+          return this.processWorkItemForXRefFile(workItem);
+        return this.processSimpleWorkItem(activityId, bucketFile, workItem);
       });
   }
 
-  private CreteWorkItemForXRefFile(): Observable<WorkItem> {
-    var workItem = new WorkItem();
-    workItem.ActivityId = "PlotToPDF";
-    workItem.Arguments = new WorkItemArguments();
-    var inputFile = new WorkItemArgument();
-    inputFile.Name = "HostDwg";
-    inputFile.Resource = this.bucketFile.location;
-    var authorizationHeader = new Header();
-    authorizationHeader.Name = "Authorization"
-    authorizationHeader.Value = 'Bearer eIKmx1enQimMZXYUsrOeFURW6wIT'
-    inputFile.Headers = [authorizationHeader]
-    inputFile.ResourceKind = "EtransmitPackage";
-    workItem.Arguments.InputArguments = [inputFile];
+  private processSimpleWorkItem(activityId, bucketFile, workItem: WorkItem): Observable<WorkItem> {
+    return this.forgeService.processWorkItem(bucketFile.bucketKey, workItem, "autocad.io", activityId + '_' + bucketFile.objectKey);
+  }
 
+  private processWorkItemForXRefFile(workItem: WorkItem): Observable<WorkItem> {
+    workItem.Arguments.InputArguments[0].ResourceKind = "EtransmitPackage";
     return this.forgeService.processWorkItem(this.bucketFile.bucketKey, workItem, "autocad.io", 'Xrefs.pdf');
   }
 }
