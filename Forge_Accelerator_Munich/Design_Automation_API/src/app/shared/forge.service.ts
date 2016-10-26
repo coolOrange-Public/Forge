@@ -100,13 +100,20 @@ export class ForgeService {
         workItem.Arguments.OutputArguments = [outputFile];
         console.log(workItem)
         return this.http.post(this.basePath + engine + "/us-east/v2/WorkItems", JSON.stringify(workItem), options)
-          .map((res: Response) => [headers, res.json()]);
+          .map((res: Response) => [headers, res.json()]).catch(res => {
+              if(res.status == 429)
+              {
+                console.log("Retrying because quota is reaached ...")
+                return Observable.timer(3000).concatMap(() => this.processWorkItem(bucketKey, workItem, engine, resultFileName))
+              }
+              return Observable.throw(res);
+          });
       })
       .flatMap(result => {
         return new Observable(observer => {
           var stop = new Subject();
           Observable
-            .interval(1000)
+            .interval(3000)
             .takeUntil(stop)
             .flatMap(()=> this.http.get(this.basePath + engine + "/us-east/v2/WorkItems('" + result[1].Id + "')", new RequestOptions({headers: result[0]}))
               .map((res: Response) => res.json()))
