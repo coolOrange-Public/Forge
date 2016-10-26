@@ -98,6 +98,7 @@ export class ForgeService {
         authorizationHeader.Value = headers.get('Authorization')
         outputFile.Headers = [authorizationHeader]
         workItem.Arguments.OutputArguments = [outputFile];
+        console.log(workItem)
         return this.http.post(this.basePath + engine + "/us-east/v2/WorkItems", JSON.stringify(workItem), options)
           .map((res: Response) => [headers, res.json()]);
       })
@@ -107,7 +108,7 @@ export class ForgeService {
           Observable
             .interval(1000)
             .takeUntil(stop)
-            .flatMap(()=> this.http.get(this.basePath + engine + "('" + result[1].Id + "')", new RequestOptions({headers: result[0]}))
+            .flatMap(()=> this.http.get(this.basePath + engine + "/us-east/v2/WorkItems('" + result[1].Id + "')", new RequestOptions({headers: result[0]}))
               .map((res: Response) => res.json()))
             .subscribe(workItem => {
               observer.next(workItem);
