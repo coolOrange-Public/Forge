@@ -98,7 +98,6 @@ export class ForgeService {
         authorizationHeader.Value = headers.get('Authorization')
         outputFile.Headers = [authorizationHeader]
         workItem.Arguments.OutputArguments = [outputFile];
-        console.log(workItem)
         return this.http.post(this.basePath + engine + "/us-east/v2/WorkItems", JSON.stringify(workItem), options)
           .map((res: Response) => [headers, res.json()]);
       })
@@ -112,13 +111,9 @@ export class ForgeService {
               .map((res: Response) => res.json()))
             .subscribe(workItem => {
               observer.next(workItem);
-              if (workItem.Status == "Succeeded") {
+              if (workItem.Status == "Succeeded" || workItem.Status.startsWith("Failed")) {
                 stop.next(true);
                 observer.complete();
-              }
-              else if (workItem.Status.startsWith("Failed")) {
-                stop.next(true);
-                observer.error('Processing file failed!');
               }
             })
         });
