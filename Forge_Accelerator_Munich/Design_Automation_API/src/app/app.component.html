@@ -1,7 +1,7 @@
 <app-fileupload #fileUpload
                 [bucketKey]="'threadmodeler_templates'"
-                [allowedExtension]="'.dwg'"
-                (onUpload)="worker.">
+                [allowedExtension]="'.dwg'">
 </app-fileupload>
-<app-create-work-items #worker [hidden]="!fileUpload.uploadResult.success">
+<app-create-work-items [hidden]="!fileUpload.uploadResult.success"
+                       [bucketFile]="fileUpload.uploadResult.data">
 </app-create-work-items>
