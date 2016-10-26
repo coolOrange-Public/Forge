@@ -1,6 +1,6 @@
 <div class="file-upload">
   <h4>Select files from your computer</h4>
-  <p>Only following formats are allowed: {{allowedExtension}}</p>
+  <p>Only following formats are allowed: <b>{{allowedExtension}}</b></p>
   <form action="" method="post" enctype="multipart/form-data" (submit)="onSubmit($event)">
 
     <div class="input-group image-preview">
@@ -12,7 +12,8 @@
                        </button>
 
                        <div class="btn btn-default image-preview-input"> <span
-                         class="glyphicon glyphicon-folder-open"></span> <span class="image-preview-input-title">Browse</span>
+                         class="glyphicon glyphicon-folder-open"></span> <span
+                         class="image-preview-input-title">Browse</span>
                            <input type="file" accept="{{allowedExtension}}" name="input-file-preview"
                                   (change)="onFileInputChanged($event)" ngModel required/>
                        </div>
@@ -24,13 +25,6 @@
 
 
   <br/>
-
-  <h4>Or drag and drop files below</h4>
-  <div class="upload-drop-zone"
-       (drop)="dropUploadZone($event)" (dragover)="dragoverUploadZone($event)"
-       (dragleave)="dragleaveUploadZone($event)">
-    Just drag and drop files here
-  </div>
 
   <div class="progress" *ngIf="progress != 0 &&  progress != 100">
     <div class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" aria-valuenow="40"

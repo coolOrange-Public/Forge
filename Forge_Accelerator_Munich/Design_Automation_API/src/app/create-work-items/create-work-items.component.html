@@ -8,7 +8,7 @@
                  (change)="onTaskCountChanged($event)">
           <span class="input-group-btn">
           <button class="btn btn-labeled btn-default" type="submit"><span class="btn-label"><i
-            class="glyphicon glyphicon-expand"></i> </span> Start</button>
+            class="glyphicon glyphicon-play"></i> </span> Start</button>
           </span>
         </div>
       </div>
@@ -16,23 +16,31 @@
   </form>
   <div class="row" style="padding-top: 10px">
     <div class="col-xs-12">
-      <table class="table" *ngFor='let workitem of workItems'>
-        <tr *ngIf="workitem.Status == 'Pending' || workitem.Status == 'InProgress' " class="active">
-          <td class="col-xs-8">
-            {{workitem.ActivityId}}
-          </td>
+      <table class="table" [hidden]="workItems == null">
+        <tr>
+          <th>Activity</th>
+          <th>Time Started</th>
+          <th>Time Ended</th>
+          <th>State</th>
+          <th>Report</th>
+        </tr>
+        <tr *ngFor='let workitem of workItems'
+            [ngClass]="{success: workitem.Status == 'Succeeded', danger: workitem.Status.indexOf('Failed') > -1}">
           <td class="col-xs-4">
-            In Progress...
-          </td>
-        </tr>
-        <tr *ngIf="workitem.Status == 'Succeeded'" class="success">
-          <td class="col-xs-12">
             {{workitem.ActivityId}}
           </td>
-        </tr>
-        <tr *ngIf="workitem.Status == 'Failed'" class="danger">
-          <td class="col-xs-12">
-            {{workitem.ActivityId}}
+          <td class="col-xs-2">
+            {{workitem.TimeQueued | date:'HH:mm:ss' }}
+          </td>
+          <td class="col-xs-2">
+            {{workitem.TimeOutputTransferEnded | date:'HH:mm:ss'}}
+          </td>
+          <td class="col-xs-2">
+            {{workitem.Status}}
+          </td>
+          <td class="col-xs-2">
+            <a href="{{workitem.StatusDetails?.Report}}"
+               [hidden]="workitem.StatusDetails == null || workitem.StatusDetails.Report == null ">Report</a>
           </td>
         </tr>
       </table>

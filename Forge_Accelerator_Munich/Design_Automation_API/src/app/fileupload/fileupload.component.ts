@@ -70,27 +70,4 @@ export class FileuploadComponent implements OnInit {
     event.preventDefault()
     this.upload(this.inputFile);
   }
-
-
-  dropUploadZone(event) {
-    event.preventDefault();
-    event.srcElement.className = 'upload-drop-zone drop';
-    var file = event.dataTransfer.files[0];
-    if (!file.name.endsWith(this.allowedExtension))
-      alert("Only files with extension " + this.allowedExtension + " can be uploaded!");
-    else {
-      this.inputFile = file;
-      this.upload(this.inputFile);
-    }
-  }
-
-  dragoverUploadZone(event) {
-    event.srcElement.className = 'upload-drop-zone drop';
-    return false;
-  }
-
-  dragleaveUploadZone(event) {
-    event.srcElement.className = 'upload-drop-zone';
-    return false;
-  }
 }

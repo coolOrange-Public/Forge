@@ -2,13 +2,11 @@ import {Component, OnInit, Input} from '@angular/core';
 import {Observable} from "rxjs";
 import {
   ForgeService,
-  Bucket,
   BucketFile,
   Header,
-  DerivativeManifest,
   WorkItem,
   WorkItemArguments,
-  WorkItemArgument
+  WorkItemArgument, Scope, Activity
 } from '../shared/forge.service';
 
 @Component({
@@ -26,12 +24,14 @@ export class CreateWorkItemsComponent implements OnInit {
 
   workItems: WorkItem[];
   taskCount: number = 3;
+  activities: Activity[] = [];
 
-  xref_bucketFile: BucketFile;
   ngOnInit() {
-    this.forgeService.getBucketFile('automation_api_tests', 'Drawing.zip').subscribe((bucketFile: BucketFile) => {
-      this.xref_bucketFile = bucketFile;
-    })
+    this.forgeService.getActivities()
+      .subscribe((activities: Activity[]) => {
+        console.log(activities);
+        this.activities = activities;
+      })
   }
 
   onTaskCountChanged(event) {
@@ -44,28 +44,45 @@ export class CreateWorkItemsComponent implements OnInit {
   }
 
   createWorkItems(bucketFile: BucketFile) {
-    console.log("TaskCount:", this.taskCount);
     this.workItems = [];
-    for (let i = 0; i < this.taskCount; ++i){
+    var j = 0;
+
+    for (let i = 0; i < this.taskCount; ++i) {
+      if (j == this.activities.length)
+        j = 0;
       var workItem = new WorkItem();
       workItem.Status = 'InProgress';
-      workItem.ActivityId = "Activity";
+      workItem.ActivityId = this.activities[j].Id;
       this.workItems.push(workItem);
+      j++;
     }
 
-
-    console.log("WorkItems:", this.workItems);
-    var states = ['InProgress', 'Succeeded', 'Failed'];
     for (let i = 0; i < this.workItems.length; ++i) {
-      this.CreteWorkItemForXRefFile()
+      this.CreateWorkItem(this.workItems[i].ActivityId)
         .subscribe((workItem: WorkItem) => {
-        console.log("subscription",workItem);
-        console.log("Pos", i);
-        this.workItems[i] = workItem;
-      }, error=>{
-          this.workItems[i].Status = 'Failed';
+          this.workItems[i] = workItem;
+        }, error=> {
+          this.workItems[i].Status = error;
         });
     }
+  }
+
+  private CreateWorkItem(activityId: string): Observable<WorkItem> {
+    return this.forgeService.getAuthorizationHeader([Scope.DataRead])
+      .flatMap(headers => {
+        var workItem = new WorkItem();
+        workItem.ActivityId = activityId;
+        workItem.Arguments = new WorkItemArguments();
+        var inputFile = new WorkItemArgument();
+        inputFile.Name = "HostDwg";
+        inputFile.Resource = this.bucketFile.location;
+        var authorizationHeader = new Header();
+        authorizationHeader.Name = "Authorization"
+        authorizationHeader.Value = headers.get('Authorization');
+        inputFile.Headers = [authorizationHeader]
+        workItem.Arguments.InputArguments = [inputFile];
+        return this.forgeService.processWorkItem(this.bucketFile.bucketKey, workItem, "autocad.io", activityId + '_' + this.bucketFile.objectKey);
+      });
   }
 
   private CreteWorkItemForXRefFile(): Observable<WorkItem> {
@@ -74,15 +91,14 @@ export class CreateWorkItemsComponent implements OnInit {
     workItem.Arguments = new WorkItemArguments();
     var inputFile = new WorkItemArgument();
     inputFile.Name = "HostDwg";
-    inputFile.Resource = this.xref_bucketFile.location;
+    inputFile.Resource = this.bucketFile.location;
     var authorizationHeader = new Header();
     authorizationHeader.Name = "Authorization"
-    authorizationHeader.Value ='Bearer eIKmx1enQimMZXYUsrOeFURW6wIT'
+    authorizationHeader.Value = 'Bearer eIKmx1enQimMZXYUsrOeFURW6wIT'
     inputFile.Headers = [authorizationHeader]
     inputFile.ResourceKind = "EtransmitPackage";
     workItem.Arguments.InputArguments = [inputFile];
 
-    return this.forgeService.processWorkItem(this.xref_bucketFile.bucketKey, workItem, "autocad.io", 'Xrefs.pdf')
-      .filter((workItem: WorkItem) => workItem.Status == "Succeeded");
+    return this.forgeService.processWorkItem(this.bucketFile.bucketKey, workItem, "autocad.io", 'Xrefs.pdf');
   }
 }

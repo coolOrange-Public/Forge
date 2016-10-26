@@ -1,6 +1,6 @@
 <app-fileupload #fileUpload
                 [bucketKey]="'automation_api_tests'"
-                [allowedExtension]="'.dwg'">
+                [allowedExtension]="'.dwg, .zip'">
 </app-fileupload>
 <app-create-work-items [hidden]="!fileUpload.uploadResult.success"
                        [bucketFile]="fileUpload.uploadResult.data">

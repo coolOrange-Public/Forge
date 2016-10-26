@@ -10,12 +10,12 @@ export class ForgeService {
   constructor(private http: Http, private jsonp: Jsonp) {
   }
 
-  getActivities() {
+  getActivities() : Observable<Activity[]> {
     return this.getAuthorizationHeader([Scope.CodeAll])
       .flatMap(headers => {
         let options = new RequestOptions({headers: headers});
         return this.http.get(this.basePath + 'autocad.io/us-east/v2/Activities', options)
-          .map((res: Response) => res.json());
+          .map((res: Response) => res.json().value);
       });
   }
 
@@ -118,7 +118,7 @@ export class ForgeService {
               }
               else if (workItem.Status.startsWith("Failed")) {
                 stop.next(true);
-                observer.error('Processing file failed!');
+                observer.error(workItem.Status);
               }
             })
         });
@@ -186,6 +186,13 @@ export class WorkItem {
   Arguments: WorkItemArguments;
   Status: string;
   Id: string;
+  StatusDetails : StatusDetails;
+  TimeQueued : string;
+  TimeOutputTransferEnded: string;
+}
+
+export class StatusDetails{
+  Report: string;
 }
 
 export class WorkItemArguments {
@@ -273,4 +280,10 @@ export class BucketFile {
   size: number;
   "content-type": string;
   location: string;
+}
+
+export class Activity {
+  Id: string;
+  Version: string;
+  Description: string;
 }
