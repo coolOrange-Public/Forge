@@ -34,7 +34,7 @@
         env: 'AutodeskProduction',
         accessToken: 'JcuTkOh4rBSybo8A8lEypR8PQj42'
     };
-    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dGhyZWFkbW9kZWxlcl9maWxlcy9HdXNzZXQuaXB0';
+    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dGhyZWFkbW9kZWxlcl9maWxlcy9QYWRMb2NrLnppcA';
     Autodesk.Viewing.Initializer(options, function onInitialized(){
         Autodesk.Viewing.Document.load(documentId, onDocumentLoadSuccess, onDocumentLoadFailure);
     });
@@ -79,7 +79,41 @@
     function onLoadModelSuccess(model) {
         console.log('onLoadModelSuccess()!');
         console.log('Validate model loaded: ' + (viewer.model === model));
-        console.log(model);
+
+        //viewer is your viewer object
+        viewer.getObjectTree(function (objTree) {
+            console.log(objTree);
+            console.log(objTree.getRootId());
+            var ids= getAlldbIds(objTree);
+            console.log(ids);
+        });
+    }
+
+    function getAlldbIds (instanceTree) {
+        var alldbId = [];
+        var rootId =  instanceTree.getRootId();
+        if (!rootId) {
+            return alldbId;
+        }
+        var queue = [];
+        queue.push(rootId);
+        while (queue.length > 0) {
+            var node = queue.shift();
+            alldbId.push(node);
+            logAllProperties(viewer.model, node);
+            instanceTree.enumNodeChildren(node, function(childrenIds) {
+                queue.push(childrenIds);
+            });
+        }
+        return alldbId;
+    }
+
+    function logAllProperties(model, dbId){
+        console.log("getting properties from id " + dbId);
+        model.getProperties(dbId, function(result) {
+            console.log(result)
+        }, function() {
+        });
     }
 
     /**
