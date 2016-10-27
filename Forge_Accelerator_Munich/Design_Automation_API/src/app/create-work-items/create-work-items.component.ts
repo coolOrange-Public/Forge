@@ -8,6 +8,7 @@ import {
   WorkItemArguments,
   WorkItemArgument, Scope, Activity
 } from '../shared/forge.service';
+import {forEach} from "@angular/router/src/utils/collection";
 
 @Component({
   selector: 'app-create-work-items',
@@ -29,8 +30,10 @@ export class CreateWorkItemsComponent implements OnInit {
   ngOnInit() {
     this.forgeService.getActivities()
       .subscribe((activities: Activity[]) => {
-        console.log(activities);
-        this.activities = activities;
+          this.activities = activities;
+          var rndActivity = new Activity();
+          rndActivity.Id = "Random";
+          this.activities.push(rndActivity);
       })
   }
 

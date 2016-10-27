@@ -1,0 +1,108 @@
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=no"/>
+    <meta charset="utf-8">
+
+    <!-- The Viewer CSS -->
+    <link rel="stylesheet" href="https://developer.api.autodesk.com/viewingservice/v1/viewers/style.min.css"
+          type="text/css">
+
+    <!-- Developer CSS -->
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #MyViewerDiv {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #F0F8FF;
+        }
+
+        .my-custom-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
+            margin: .3em;
+            padding: .3em;
+            font-size: 15px;
+            font-family: sans-serif;
+            background-color: #ffffff;
+            border-radius: 8px;
+        }
+
+        .my-custom-ui span {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<!-- The Viewer will be instantiated here -->
+<div id="myUi" class="my-custom-ui">
+    <div>Items selected: <span id="MySelectionValue">0</span></div>
+    <div>Navigation tool: <span id="MyToolValue">Unknown</span></div>
+</div>
+<div id="MyViewerDiv"></div>
+
+<!-- The Viewer JS -->
+<script src="https://developer.api.autodesk.com/viewingservice/v1/viewers/three.min.js"></script>
+<script src="https://developer.api.autodesk.com/viewingservice/v1/viewers/viewer3D.min.js"></script>
+<script src="EventsTutorial.js"></script>
+<!-- Developer JS -->
+<script>
+    var viewerApp;
+    var options = {
+        env: 'AutodeskProduction',
+        getAccessToken: function (onGetAccessToken) {
+            var accessToken = 'JcuTkOh4rBSybo8A8lEypR8PQj42';
+            var expireTimeSeconds = 60 * 30;
+            onGetAccessToken(accessToken, expireTimeSeconds);
+        }
+
+    };
+    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dGhyZWFkbW9kZWxlcl9maWxlcy9QYWRMb2NrLnppcA';
+    var config3d = {
+        extensions: ['EventsTutorial']
+    };
+    Autodesk.Viewing.Initializer(options, function onInitialized() {
+        viewerApp = new Autodesk.Viewing.ViewingApplication('MyViewerDiv');
+        viewerApp.registerViewer(viewerApp.k3D, Autodesk.Viewing.Private.GuiViewer3D, config3d);
+        viewerApp.loadDocument(documentId, onDocumentLoadSuccess, onDocumentLoadFailure);
+    });
+
+    function onDocumentLoadSuccess(doc) {
+
+        // We could still make use of Document.getSubItemsWithProperties()
+        // However, when using a ViewingApplication, we have access to the **bubble** attribute,
+        // which references the root node of a graph that wraps each object from the Manifest JSON.
+        var viewables = viewerApp.bubble.search({'type': 'geometry'});
+        if (viewables.length === 0) {
+            console.error('Document contains no viewables.');
+            return;
+        }
+
+        // Choose any of the avialble viewables
+        viewerApp.selectItem(viewables[0].data, onItemLoadSuccess, onItemLoadFail);
+    }
+
+    function onDocumentLoadFailure(viewerErrorCode) {
+        console.error('onDocumentLoadFailure() - errorCode:' + viewerErrorCode);
+    }
+
+    function onItemLoadSuccess(viewer, item) {
+        console.log('onItemLoadSuccess()!');
+        console.log(viewer);
+        console.log(item);
+
+        // Congratulations! The viewer is now ready to be used.
+        console.log('Viewers are equal: ' + (viewer === viewerApp.getCurrentViewer()));
+    }
+
+    function onItemLoadFail(errorCode) {
+        console.error('onItemLoadFail() - errorCode:' + errorCode);
+    }
+
+</script>
+</body>
